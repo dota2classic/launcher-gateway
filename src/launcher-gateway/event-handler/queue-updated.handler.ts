@@ -10,9 +10,6 @@ import { QueueRepository } from '../repository/queue.repository';
 
 @EventsHandler(QueueUpdatedEvent)
 export class QueueUpdatedHandler implements IEventHandler<QueueUpdatedEvent> {
-  @WebSocketServer()
-  server: Server;
-
   constructor(
     private readonly ebus: EventBus,
     private readonly qbus: QueryBus,

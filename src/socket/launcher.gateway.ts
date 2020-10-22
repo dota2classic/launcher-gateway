@@ -7,7 +7,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { EnterQueue, Messages } from './messages';
+import { EnterQueue, Messages, ReadyCheck } from './messages';
 import { steam64to32 } from '../util/steamIds';
 import { MatchmakingModes } from '../gateway/shared-types/matchmaking-mode';
 import { QueueRepository } from '../launcher-gateway/repository/queue.repository';
@@ -17,6 +17,7 @@ import { PlayerId } from '../gateway/shared-types/player-id';
 import { Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { PlayerLeaveQueueCommand } from '../gateway/commands/player-leave-queue.command';
+import { ReadyState, ReadyStateReceivedEvent } from '../gateway/events/ready-state-received.event';
 
 export interface LauncherSocket extends Socket {
   steam_id: string;
@@ -71,6 +72,18 @@ export class LauncherGateway implements OnGatewayDisconnect {
         .toPromise(),
     );
     await Promise.all(cmds);
+  }
+
+
+  @SubscribeMessage(Messages.SET_READY_CHECK)
+  async acceptGame(
+    @MessageBody() data: ReadyCheck,
+    @ConnectedSocket() client: LauncherSocket) {
+    this.ebus.publish(new ReadyStateReceivedEvent(
+      new PlayerId(client.steam_id),
+      data.roomID,
+      data.accept ? ReadyState.READY : ReadyState.DECLINE
+    ))
   }
 
   async handleDisconnect(client: any) {

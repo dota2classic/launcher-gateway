@@ -6,6 +6,7 @@ import { LauncherGateway } from './socket/launcher.gateway';
 import { GatewayProviders } from './launcher-gateway';
 import { GatewayController } from './gateway.controller';
 import { LauncherDeliver } from './socket/launcher.deliver';
+import { GatewayService } from './gateway.service';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { LauncherDeliver } from './socket/launcher.deliver';
   providers: [
     ...GatewayProviders,
     LauncherGateway,
-    LauncherDeliver
+    LauncherDeliver,
+    GatewayService
   ],
 })
 export class AppModule {}
