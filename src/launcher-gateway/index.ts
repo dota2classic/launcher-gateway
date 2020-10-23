@@ -7,6 +7,8 @@ import { GameServerStartedHandler } from './event-handler/game-server-started.ha
 import { GetUserRoomHandler } from './query/GetUserRoom/get-user-room.handler';
 import { RoomNotReadyHandler } from './event-handler/room-not-ready.handler';
 import { GetUserQueueHandler } from './query/GetUserQueue/get-user-queue.handler';
+import { MatchFinishedHandler } from './event-handler/match-finished.handler';
+import { GetSessionByUserHandler } from './query/GetSessionByUser/get-session-by-user.handler';
 
 const EventHandlers = [
   QueueUpdatedHandler,
@@ -14,6 +16,7 @@ const EventHandlers = [
   ReadyStateUpdatedHandler,
   GameServerStartedHandler,
   RoomNotReadyHandler,
+  MatchFinishedHandler
 ];
 
 const QueryHandlers = [QueueStateHandler, GetUserQueueHandler];
@@ -23,5 +26,6 @@ export const GatewayProviders = [
   ...QueryHandlers,
 
   GetUserRoomHandler,
+  GetSessionByUserHandler,
   QueueRepository,
 ];

@@ -22,6 +22,8 @@ import { GetUserRoomQuery } from '../gateway/queries/GetUserRoom/get-user-room.q
 import { GetUserRoomQueryResult } from '../gateway/queries/GetUserRoom/get-user-room-query.result';
 import { GetUserQueueQuery } from '../gateway/queries/GetUserQueue/get-user-queue.query';
 import { GetUserQueueQueryResult } from '../gateway/queries/GetUserQueue/get-user-queue-query.result';
+import { GetSessionByUserQuery } from '../gateway/queries/GetSessionByUser/get-session-by-user.query';
+import { GetSessionByUserQueryResult } from '../gateway/queries/GetSessionByUser/get-session-by-user-query.result';
 
 export interface LauncherSocket extends Socket {
   steam_id: string;
@@ -58,6 +60,14 @@ export class LauncherGateway implements OnGatewayDisconnect {
       GetUserRoomQueryResult
     >(new GetUserRoomQuery(new PlayerId(client.steam_id)));
     client.emit(Messages.ROOM_STATE, roomState?.info);
+
+
+    // this thing is for "current match"
+    const matchState = await this.qbus.execute<
+      GetSessionByUserQuery,
+      GetSessionByUserQueryResult
+      >(new GetSessionByUserQuery(new PlayerId(client.steam_id)));
+    client.emit(Messages.MATCH_STATE, matchState?.serverUrl);
 
 
   }
