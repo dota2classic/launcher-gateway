@@ -11,13 +11,17 @@ import { EnterQueue, Messages, ReadyCheck } from './messages';
 import { steam64to32 } from '../util/steamIds';
 import { MatchmakingModes } from '../gateway/shared-types/matchmaking-mode';
 import { QueueRepository } from '../launcher-gateway/repository/queue.repository';
-import { EventBus } from '@nestjs/cqrs';
+import { EventBus, QueryBus } from '@nestjs/cqrs';
 import { PlayerEnterQueueCommand } from '../gateway/commands/player-enter-queue.command';
 import { PlayerId } from '../gateway/shared-types/player-id';
 import { Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { PlayerLeaveQueueCommand } from '../gateway/commands/player-leave-queue.command';
 import { ReadyState, ReadyStateReceivedEvent } from '../gateway/events/ready-state-received.event';
+import { GetUserRoomQuery } from '../gateway/queries/GetUserRoom/get-user-room.query';
+import { GetUserRoomQueryResult } from '../gateway/queries/GetUserRoom/get-user-room-query.result';
+import { GetUserQueueQuery } from '../gateway/queries/GetUserQueue/get-user-queue.query';
+import { GetUserQueueQueryResult } from '../gateway/queries/GetUserQueue/get-user-queue-query.result';
 
 export interface LauncherSocket extends Socket {
   steam_id: string;
@@ -31,6 +35,7 @@ export class LauncherGateway implements OnGatewayDisconnect {
   constructor(
     private readonly qRep: QueueRepository,
     private readonly ebus: EventBus,
+    private readonly qbus: QueryBus,
     @Inject('QueryCore') private readonly redis: ClientProxy,
   ) {}
 
@@ -46,6 +51,15 @@ export class LauncherGateway implements OnGatewayDisconnect {
         inQueue: this.qRep.get(t).inQueue,
       });
     });
+
+    // this thing is for "ready check state"
+    const roomState = await this.qbus.execute<
+      GetUserRoomQuery,
+      GetUserRoomQueryResult
+    >(new GetUserRoomQuery(new PlayerId(client.steam_id)));
+    client.emit(Messages.ROOM_STATE, roomState?.info);
+
+
   }
 
   @SubscribeMessage(Messages.ENTER_QUEUE)
@@ -74,16 +88,18 @@ export class LauncherGateway implements OnGatewayDisconnect {
     await Promise.all(cmds);
   }
 
-
   @SubscribeMessage(Messages.SET_READY_CHECK)
   async acceptGame(
     @MessageBody() data: ReadyCheck,
-    @ConnectedSocket() client: LauncherSocket) {
-    this.ebus.publish(new ReadyStateReceivedEvent(
-      new PlayerId(client.steam_id),
-      data.roomID,
-      data.accept ? ReadyState.READY : ReadyState.DECLINE
-    ))
+    @ConnectedSocket() client: LauncherSocket,
+  ) {
+    this.ebus.publish(
+      new ReadyStateReceivedEvent(
+        new PlayerId(client.steam_id),
+        data.roomID,
+        data.accept ? ReadyState.READY : ReadyState.DECLINE,
+      ),
+    );
   }
 
   async handleDisconnect(client: any) {

@@ -9,6 +9,7 @@ import { ReadyStateUpdatedEvent } from './gateway/events/ready-state-updated.eve
 import { MatchStartedEvent } from './gateway/events/match-started.event';
 import { MatchFinishedEvent } from './gateway/events/match-finished.event';
 import { GameServerStartedEvent } from './gateway/events/game-server-started.event';
+import { RoomNotReadyEvent } from './gateway/events/room-not-ready.event';
 
 @Controller()
 export class GatewayController {
@@ -57,5 +58,10 @@ export class GatewayController {
   @EventPattern(GameServerStartedEvent.name)
   async GameServerStartedEvent(data: GameServerStartedEvent) {
     this.event(GameServerStartedEvent, data);
+  }
+
+  @EventPattern(RoomNotReadyEvent.name)
+  async RoomNotReadyEvent(data: RoomNotReadyEvent) {
+    this.event(RoomNotReadyEvent, data);
   }
 }
