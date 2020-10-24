@@ -1,14 +1,15 @@
-import { QueueStateHandler } from './query/GatewayQueueState/queue-state.handler';
 import { QueueUpdatedHandler } from './event-handler/queue-updated.handler';
 import { QueueRepository } from './repository/queue.repository';
 import { ReadyCheckStartedHandler } from './event-handler/ready-check-started.handler';
 import { ReadyStateUpdatedHandler } from './event-handler/ready-check-updated.handler';
 import { GameServerStartedHandler } from './event-handler/game-server-started.handler';
-import { GetUserRoomHandler } from './query/GetUserRoom/get-user-room.handler';
 import { RoomNotReadyHandler } from './event-handler/room-not-ready.handler';
-import { GetUserQueueHandler } from './query/GetUserQueue/get-user-queue.handler';
 import { MatchFinishedHandler } from './event-handler/match-finished.handler';
-import { GetSessionByUserHandler } from './query/GetSessionByUser/get-session-by-user.handler';
+import { outerQuery } from '../gateway/util/outerQuery';
+import { QueueStateQuery } from '../gateway/queries/QueueState/queue-state.query';
+import { GetSessionByUserQuery } from '../gateway/queries/GetSessionByUser/get-session-by-user.query';
+import { GetUserQueueQuery } from '../gateway/queries/GetUserQueue/get-user-queue.query';
+import { GetUserRoomQuery } from '../gateway/queries/GetUserRoom/get-user-room.query';
 
 const EventHandlers = [
   QueueUpdatedHandler,
@@ -16,16 +17,21 @@ const EventHandlers = [
   ReadyStateUpdatedHandler,
   GameServerStartedHandler,
   RoomNotReadyHandler,
-  MatchFinishedHandler
+  MatchFinishedHandler,
 ];
 
-const QueryHandlers = [QueueStateHandler, GetUserQueueHandler];
+const QueryHandlers = [
+
+  outerQuery(QueueStateQuery, "QueryCore"),
+  outerQuery(GetSessionByUserQuery, "QueryCore"),
+  outerQuery(GetUserQueueQuery, "QueryCore"),
+  outerQuery(GetUserRoomQuery, "QueryCore"),
+];
 
 export const GatewayProviders = [
   ...EventHandlers,
   ...QueryHandlers,
 
-  GetUserRoomHandler,
-  GetSessionByUserHandler,
   QueueRepository,
+
 ];
