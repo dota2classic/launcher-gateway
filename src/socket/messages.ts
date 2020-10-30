@@ -15,6 +15,7 @@ export enum Messages {
   QUEUE_STATE = 'QUEUE_STATE',
   MATCH_FINISHED = 'MATCH_FINISHED',
   MATCH_STATE = 'MATCH_STATE',
+  BROWSER_AUTH = 'BROWSER_AUTH',
 }
 
 export interface ReadyCheckUpdate {

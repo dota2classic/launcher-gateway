@@ -31,6 +31,7 @@
     "@nestjs/platform-socket.io": "^7.4.4",
     "@nestjs/websockets": "^7.4.4",
     "dotenv": "^8.2.0",
+    "jwt-decode": "^3.0.0",
     "redis": "^3.0.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",

@@ -20,10 +20,9 @@ import { PlayerLeaveQueueCommand } from '../gateway/commands/player-leave-queue.
 import { ReadyState, ReadyStateReceivedEvent } from '../gateway/events/ready-state-received.event';
 import { GetUserRoomQuery } from '../gateway/queries/GetUserRoom/get-user-room.query';
 import { GetUserRoomQueryResult } from '../gateway/queries/GetUserRoom/get-user-room-query.result';
-import { GetUserQueueQuery } from '../gateway/queries/GetUserQueue/get-user-queue.query';
-import { GetUserQueueQueryResult } from '../gateway/queries/GetUserQueue/get-user-queue-query.result';
 import { GetSessionByUserQuery } from '../gateway/queries/GetSessionByUser/get-session-by-user.query';
 import { GetSessionByUserQueryResult } from '../gateway/queries/GetSessionByUser/get-session-by-user-query.result';
+import * as jwt_decode from "jwt-decode";
 
 export interface LauncherSocket extends Socket {
   steam_id: string;
@@ -41,12 +40,51 @@ export class LauncherGateway implements OnGatewayDisconnect {
     @Inject('QueryCore') private readonly redis: ClientProxy,
   ) {}
 
+
   @SubscribeMessage(Messages.AUTH)
   async onAuth(
     @MessageBody() data: string,
     @ConnectedSocket() client: LauncherSocket,
   ) {
     client.steam_id = steam64to32(data);
+
+    MatchmakingModes.map(t => {
+      client.emit(Messages.QUEUE_UPDATE, {
+        mode: t,
+        inQueue: this.qRep.get(t).inQueue,
+      });
+    });
+
+    // this thing is for "ready check state"
+    const roomState = await this.qbus.execute<
+      GetUserRoomQuery,
+      GetUserRoomQueryResult
+      >(new GetUserRoomQuery(new PlayerId(client.steam_id)));
+    client.emit(Messages.ROOM_STATE, roomState?.info);
+
+
+    // this thing is for "current match"
+    const matchState = await this.qbus.execute<
+      GetSessionByUserQuery,
+      GetSessionByUserQueryResult
+      >(new GetSessionByUserQuery(new PlayerId(client.steam_id)));
+    client.emit(Messages.MATCH_STATE, matchState?.serverUrl);
+
+
+  }
+
+
+  @SubscribeMessage(Messages.BROWSER_AUTH)
+  async onBrowserAuth(
+    @MessageBody() data: string,
+    @ConnectedSocket() client: LauncherSocket,
+  ) {
+
+    const parsed = jwt_decode(data);
+
+    // data = token
+    client.steam_id = parsed.sub;
+
     MatchmakingModes.map(t => {
       client.emit(Messages.QUEUE_UPDATE, {
         mode: t,
