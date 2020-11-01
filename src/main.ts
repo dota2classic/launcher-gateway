@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { REDIS_URL } from './config/env';
+import { REDIS_PASSWORD, REDIS_URL } from './config/env';
 import { Transport } from '@nestjs/microservices';
 import { MatchmakingModes } from './gateway/shared-types/matchmaking-mode';
 import { CommandBus, EventBus } from '@nestjs/cqrs';
@@ -19,6 +19,7 @@ async function bootstrap() {
     options: {
       url: REDIS_URL(),
       retryAttempts: Infinity,
+      password: REDIS_PASSWORD(),
       retryDelay: 5000,
     },
   });
