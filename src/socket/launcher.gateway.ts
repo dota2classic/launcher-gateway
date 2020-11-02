@@ -151,14 +151,14 @@ export class LauncherGateway implements OnGatewayDisconnect {
   }
 
   async handleDisconnect(client: any) {
-    const cmds = MatchmakingModes.map(mode =>
-      this.redis
-        .emit(
-          PlayerLeaveQueueCommand.name,
-          new PlayerLeaveQueueCommand(new PlayerId(client.steam_id), mode),
-        )
-        .toPromise(),
-    );
-    await Promise.all(cmds);
+    // const cmds = MatchmakingModes.map(mode =>
+    //   this.redis
+    //     .emit(
+    //       PlayerLeaveQueueCommand.name,
+    //       new PlayerLeaveQueueCommand(new PlayerId(client.steam_id), mode),
+    //     )
+    //     .toPromise(),
+    // );
+    // await Promise.all(cmds);
   }
 }
