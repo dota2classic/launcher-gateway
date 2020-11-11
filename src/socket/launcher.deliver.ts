@@ -1,11 +1,17 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { PlayerId } from '../gateway/shared-types/player-id';
-import { LauncherSocket } from './launcher.gateway';
 import { GetUserQueueQuery } from '../gateway/queries/GetUserQueue/get-user-queue.query';
 import { GetUserQueueQueryResult } from '../gateway/queries/GetUserQueue/get-user-queue-query.result';
 import { Messages } from './messages';
 import { QueryBus } from '@nestjs/cqrs';
+
+
+
+export interface LauncherSocket extends Socket {
+  steam_id: string;
+  playerId: PlayerId
+}
 
 @WebSocketGateway()
 export class LauncherDeliver {

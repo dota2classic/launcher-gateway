@@ -10,6 +10,8 @@ import { QueueStateQuery } from '../gateway/queries/QueueState/queue-state.query
 import { GetSessionByUserQuery } from '../gateway/queries/GetSessionByUser/get-session-by-user.query';
 import { GetUserQueueQuery } from '../gateway/queries/GetUserQueue/get-user-queue.query';
 import { GetUserRoomQuery } from '../gateway/queries/GetUserRoom/get-user-room.query';
+import { PartyInviteCreatedHandler } from './event-handler/party-invite-created.handler';
+import { GetUserInfoQuery } from '../gateway/queries/GetUserInfo/get-user-info.query';
 
 const EventHandlers = [
   QueueUpdatedHandler,
@@ -18,6 +20,7 @@ const EventHandlers = [
   GameServerStartedHandler,
   RoomNotReadyHandler,
   MatchFinishedHandler,
+  PartyInviteCreatedHandler
 ];
 
 const QueryHandlers = [
@@ -26,6 +29,7 @@ const QueryHandlers = [
   outerQuery(GetSessionByUserQuery, "QueryCore"),
   outerQuery(GetUserQueueQuery, "QueryCore"),
   outerQuery(GetUserRoomQuery, "QueryCore"),
+  outerQuery(GetUserInfoQuery, "QueryCore"),
 ];
 
 export const GatewayProviders = [

@@ -1,5 +1,4 @@
 import { MatchmakingMode } from '../gateway/shared-types/matchmaking-mode';
-import { MatchInfo } from '../gateway/events/room-ready.event';
 
 export enum Messages {
   AUTH = 'AUTH',
@@ -16,6 +15,8 @@ export enum Messages {
   MATCH_FINISHED = 'MATCH_FINISHED',
   MATCH_STATE = 'MATCH_STATE',
   BROWSER_AUTH = 'BROWSER_AUTH',
+  INVITE_TO_PARTY = 'INVITE_TO_PARTY',
+  PARTY_INVITE_RECEIVED = 'PARTY_INVITE_RECEIVED',
 }
 
 export interface ReadyCheckUpdate {
@@ -48,4 +49,16 @@ export interface ReadyCheck {
 
 export interface LauncherServerStarted {
   url: string;
+}
+
+export class PartyInviteReceivedMessage {
+  constructor(
+    public readonly partyId: string,
+    public readonly leader: string,
+    public readonly inviteId: string
+  ) {}
+}
+
+export interface PartyInvite {
+  id: string;
 }
