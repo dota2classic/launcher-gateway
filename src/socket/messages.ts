@@ -17,6 +17,7 @@ export enum Messages {
   BROWSER_AUTH = 'BROWSER_AUTH',
   INVITE_TO_PARTY = 'INVITE_TO_PARTY',
   PARTY_INVITE_RECEIVED = 'PARTY_INVITE_RECEIVED',
+  PARTY_INVITE_EXPIRED = 'PARTY_INVITE_EXPIRED',
 }
 
 export interface ReadyCheckUpdate {
@@ -55,9 +56,10 @@ export class PartyInviteReceivedMessage {
   constructor(
     public readonly partyId: string,
     public readonly leader: string,
-    public readonly inviteId: string
+    public readonly inviteId: string,
   ) {}
 }
+
 
 export interface PartyInvite {
   id: string;
