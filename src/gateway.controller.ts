@@ -12,6 +12,7 @@ import { GameServerStartedEvent } from './gateway/events/game-server-started.eve
 import { RoomNotReadyEvent } from './gateway/events/room-not-ready.event';
 import { PartyInviteCreatedEvent } from './gateway/events/party/party-invite-created.event';
 import { PartyInviteExpiredEvent } from './gateway/events/party/party-invite-expired.event';
+import { PartyUpdatedEvent } from './gateway/events/party/party-updated.event';
 
 @Controller()
 export class GatewayController {
@@ -75,5 +76,10 @@ export class GatewayController {
   @EventPattern(PartyInviteExpiredEvent.name)
   async PartyInviteExpiredEvent(data: PartyInviteExpiredEvent) {
     this.event(PartyInviteExpiredEvent, data);
+  }
+
+  @EventPattern(PartyUpdatedEvent.name)
+  async PartyUpdatedEvent(data: PartyUpdatedEvent) {
+    this.event(PartyUpdatedEvent, data);
   }
 }

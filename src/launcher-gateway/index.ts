@@ -12,6 +12,8 @@ import { GetUserQueueQuery } from '../gateway/queries/GetUserQueue/get-user-queu
 import { GetUserRoomQuery } from '../gateway/queries/GetUserRoom/get-user-room.query';
 import { PartyInviteCreatedHandler } from './event-handler/party-invite-created.handler';
 import { GetUserInfoQuery } from '../gateway/queries/GetUserInfo/get-user-info.query';
+import { PartyInviteExpiredHandler } from './event-handler/party-invite-expired.handler';
+import { PartyUpdatedHandler } from './event-handler/party-updated.handler';
 
 const EventHandlers = [
   QueueUpdatedHandler,
@@ -20,7 +22,10 @@ const EventHandlers = [
   GameServerStartedHandler,
   RoomNotReadyHandler,
   MatchFinishedHandler,
-  PartyInviteCreatedHandler
+  PartyInviteCreatedHandler,
+
+  PartyInviteExpiredHandler,
+  PartyUpdatedHandler
 ];
 
 const QueryHandlers = [
