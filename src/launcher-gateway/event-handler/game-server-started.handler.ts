@@ -14,6 +14,7 @@ export class GameServerStartedHandler
 
     const players = [...event.info.radiant].concat(event.info.dire);
 
+    await new Promise(r => setTimeout(r, 5000));
     players.forEach(t => {
       this.deliver.find(t)?.emit(Messages.SERVER_STARTED, {
         info: event.info,
