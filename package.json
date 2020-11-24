@@ -30,6 +30,7 @@
     "@nestjs/platform-express": "^7.0.0",
     "@nestjs/platform-socket.io": "^7.4.4",
     "@nestjs/websockets": "^7.4.4",
+    "@ntegral/nestjs-sentry": "^1.0.4",
     "dotenv": "^8.2.0",
     "jwt-decode": "^3.0.0",
     "redis": "^3.0.2",
