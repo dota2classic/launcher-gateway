@@ -24,6 +24,12 @@ export class LauncherDeliver {
     ) as LauncherSocket;
   }
 
+  public findAll(playerId: PlayerId): LauncherSocket[] {
+    return Object.values(this.server.sockets.connected).filter(
+      (it: LauncherSocket) => it.steam_id === playerId.value,
+    ) as LauncherSocket[];
+  }
+
   public async updateQueue(client: LauncherSocket) {
     const qState = await this.qbus.execute<
       GetUserQueueQuery,
@@ -38,11 +44,20 @@ export class LauncherDeliver {
 
   public async broadcast<T>(plrs: PlayerId[], t: (p: PlayerId) => [any, T]) {
     plrs.forEach(plr => {
-      const socket = this.find(plr);
-      if (socket) {
-        const s = t(plr);
-        socket.emit(s[0], s[1]);
-      }
+      const sockets = this.findAll(plr);
+      const s = t(plr);
+      sockets.forEach(socket => socket.emit(s[0], s[1]));
+    });
+  }
+
+  public deliver<T>(
+    plrs: PlayerId | PlayerId[],
+    key: Messages,
+    value?: any,
+  ) {
+    (Array.isArray(plrs) ? plrs : [plrs]).forEach(plr => {
+      const sockets = this.findAll(plr);
+      sockets.forEach(socket => socket.emit(key, value));
     });
   }
 }

@@ -13,12 +13,9 @@ export class GameServerStartedHandler
 
     await new Promise(r => setTimeout(r, 5000));
 
-    await this.deliver.broadcast(players, () => [
-      Messages.SERVER_STARTED,
-      {
-        info: event.info,
-        url: event.url,
-      },
-    ]);
+    await this.deliver.deliver(players, Messages.SERVER_STARTED, {
+      info: event.info,
+      url: event.url,
+    });
   }
 }

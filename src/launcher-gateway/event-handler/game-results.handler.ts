@@ -6,15 +6,13 @@ import { PlayerId } from '../../gateway/shared-types/player-id';
 
 @EventsHandler(GameResultsEvent)
 export class GameResultsHandler implements IEventHandler<GameResultsEvent> {
-  constructor(
-    private readonly deliver: LauncherDeliver
-  ) {}
+  constructor(private readonly deliver: LauncherDeliver) {}
 
   async handle(event: GameResultsEvent) {
     const players = event.players.map(t => new PlayerId(t.steam_id));
 
-    await this.deliver.broadcast(players, () => ([ Messages.MATCH_RESULTS_READY, {
-      url: event.server
-    }]));
+    await this.deliver.deliver(players, Messages.MATCH_RESULTS_READY, {
+      url: event.server,
+    });
   }
 }

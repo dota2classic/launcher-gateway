@@ -1,9 +1,4 @@
-import {
-  CommandBus,
-  EventBus,
-  EventsHandler,
-  IEventHandler,
-} from '@nestjs/cqrs';
+import { CommandBus, EventBus, EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { ReadyCheckStartedEvent } from '../../gateway/events/ready-check-started.event';
 import { LauncherDeliver } from '../../socket/launcher.deliver';
 import { Messages } from '../../socket/messages';
@@ -19,18 +14,15 @@ export class ReadyCheckStartedHandler
   ) {}
 
   async handle(event: ReadyCheckStartedEvent) {
-    event.entries.forEach(t => {
-      const socket = this.launcherDelivery.find(t.playerId);
-      if (socket) {
-        socket.emit(Messages.GAME_FOUND, {
-          mode: event.mode,
-          total: RoomSizes[event.mode],
-          accepted: 0,
-          roomID: event.roomId,
-        });
-      } else {
-        console.log(`Didnt find socket with id ${t.playerId.value}`);
-      }
-    });
+    this.launcherDelivery.deliver(
+      event.entries.map(z => z.playerId),
+      Messages.GAME_FOUND,
+      {
+        mode: event.mode,
+        total: RoomSizes[event.mode],
+        accepted: 0,
+        roomID: event.roomId,
+      },
+    );
   }
 }

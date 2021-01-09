@@ -12,8 +12,10 @@ export class PartyInviteExpiredHandler
   ) {}
 
   async handle(event: PartyInviteExpiredEvent) {
-    this.deliver
-      .find(event.invited)
-      ?.emit(Messages.PARTY_INVITE_EXPIRED, event.id);
+    this.deliver.deliver(
+      event.invited,
+      Messages.PARTY_INVITE_EXPIRED,
+      event.id,
+    );
   }
 }

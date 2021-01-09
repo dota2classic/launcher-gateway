@@ -8,17 +8,21 @@ import { GetUserInfoQueryResult } from '../../gateway/queries/GetUserInfo/get-us
 @EventsHandler(PartyInviteCreatedEvent)
 export class PartyInviteCreatedHandler
   implements IEventHandler<PartyInviteCreatedEvent> {
-  constructor(private readonly deliver: LauncherDeliver, private readonly queryBus: QueryBus) {}
+  constructor(
+    private readonly deliver: LauncherDeliver,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   async handle(event: PartyInviteCreatedEvent) {
+    const res = await this.queryBus.execute<
+      GetUserInfoQuery,
+      GetUserInfoQueryResult
+    >(new GetUserInfoQuery(event.leaderId));
 
-    const res = await this.queryBus.execute<GetUserInfoQuery, GetUserInfoQueryResult>(new GetUserInfoQuery(event.leaderId))
-
-    this.deliver
-      .find(event.invited)
-      ?.emit(
-        Messages.PARTY_INVITE_RECEIVED,
-        new PartyInviteReceivedMessage(event.partyId, res.name, event.id),
-      );
+    this.deliver.deliver(
+      event.invited,
+      Messages.PARTY_INVITE_RECEIVED,
+      new PartyInviteReceivedMessage(event.partyId, res.name, event.id),
+    );
   }
 }
