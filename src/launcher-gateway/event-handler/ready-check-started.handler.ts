@@ -1,4 +1,9 @@
-import { CommandBus, EventBus, EventsHandler, IEventHandler } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  EventBus,
+  EventsHandler,
+  IEventHandler,
+} from '@nestjs/cqrs';
 import { ReadyCheckStartedEvent } from '../../gateway/events/ready-check-started.event';
 import { LauncherDeliver } from '../../socket/launcher.deliver';
 import { Messages } from '../../socket/messages';
@@ -21,8 +26,10 @@ export class ReadyCheckStartedHandler
           mode: event.mode,
           total: RoomSizes[event.mode],
           accepted: 0,
-          roomID: event.roomId
+          roomID: event.roomId,
         });
+      } else {
+        console.log(`Didnt find socket with id ${t.playerId.value}`);
       }
     });
   }

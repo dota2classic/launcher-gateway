@@ -6,11 +6,9 @@ import { GetUserQueueQueryResult } from '../gateway/queries/GetUserQueue/get-use
 import { Messages } from './messages';
 import { QueryBus } from '@nestjs/cqrs';
 
-
-
 export interface LauncherSocket extends Socket {
   steam_id: string;
-  playerId: PlayerId
+  playerId: PlayerId;
 }
 
 @WebSocketGateway()
@@ -38,4 +36,13 @@ export class LauncherDeliver {
     );
   }
 
+  public async broadcast<T>(plrs: PlayerId[], t: (p: PlayerId) => [any, T]) {
+    plrs.forEach(plr => {
+      const socket = this.find(plr);
+      if (socket) {
+        const s = t(plr);
+        socket.emit(s[0], s[1]);
+      }
+    });
+  }
 }

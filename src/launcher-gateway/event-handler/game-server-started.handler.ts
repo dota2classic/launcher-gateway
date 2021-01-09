@@ -6,20 +6,19 @@ import { Messages } from '../../socket/messages';
 @EventsHandler(GameServerStartedEvent)
 export class GameServerStartedHandler
   implements IEventHandler<GameServerStartedEvent> {
-  constructor(
-    private readonly deliver: LauncherDeliver
-  ) {}
+  constructor(private readonly deliver: LauncherDeliver) {}
 
   async handle(event: GameServerStartedEvent) {
-
     const players = [...event.info.radiant].concat(event.info.dire);
 
     await new Promise(r => setTimeout(r, 5000));
-    players.forEach(t => {
-      this.deliver.find(t)?.emit(Messages.SERVER_STARTED, {
+
+    await this.deliver.broadcast(players, () => [
+      Messages.SERVER_STARTED,
+      {
         info: event.info,
-        url: event.url
-      })
-    })
+        url: event.url,
+      },
+    ]);
   }
 }

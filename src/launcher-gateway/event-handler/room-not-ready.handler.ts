@@ -11,8 +11,9 @@ export class RoomNotReadyHandler implements IEventHandler<RoomNotReadyEvent> {
 
   async handle(event: RoomNotReadyEvent) {
     const sockets = event.players.map(t => this.deliver.find(t))
+    console.log(`Found total ${sockets.length} sockets`)
     const prms = sockets.map(it => {
-      it.emit(Messages.ROOM_NOT_READY, {
+      it?.emit(Messages.ROOM_NOT_READY, {
         roomID: event.roomId
       })
       this.deliver.updateQueue(it)

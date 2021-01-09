@@ -14,6 +14,7 @@ import { PartyInviteCreatedHandler } from './event-handler/party-invite-created.
 import { GetUserInfoQuery } from '../gateway/queries/GetUserInfo/get-user-info.query';
 import { PartyInviteExpiredHandler } from './event-handler/party-invite-expired.handler';
 import { PartyUpdatedHandler } from './event-handler/party-updated.handler';
+import { GameResultsHandler } from './event-handler/game-results.handler';
 
 const EventHandlers = [
   QueueUpdatedHandler,
@@ -23,6 +24,8 @@ const EventHandlers = [
   RoomNotReadyHandler,
   MatchFinishedHandler,
   PartyInviteCreatedHandler,
+
+  GameResultsHandler,
 
   PartyInviteExpiredHandler,
   PartyUpdatedHandler
