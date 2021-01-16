@@ -13,13 +13,13 @@ import { SentryModule } from '@ntegral/nestjs-sentry';
 
 @Module({
   imports: [
-    SentryModule.forRoot({
-      dsn:
-        "https://d0b5e989af4848cf963117815f5a129a@o435989.ingest.sentry.io/5530377",
-      debug: false,
-      environment: isDev ? "dev" : "production",
-      logLevel: 2, //based on sentry.io loglevel //
-    }),
+    // SentryModule.forRoot({
+    //   dsn:
+    //     "https://d0b5e989af4848cf963117815f5a129a@o435989.ingest.sentry.io/5530377",
+    //   debug: false,
+    //   environment: isDev ? "dev" : "production",
+    //   logLevel: 2, //based on sentry.io loglevel //
+    // }),
     CqrsModule,
     ClientsModule.register([
       {
@@ -34,7 +34,7 @@ import { SentryModule } from '@ntegral/nestjs-sentry';
       },
     ] as any),
   ],
-  controllers: [GatewayController],
+  // controllers: [GatewayController],
   providers: [
     ...GatewayProviders,
 

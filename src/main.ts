@@ -24,21 +24,21 @@ async function bootstrap() {
     },
   });
 
-  await app.startAllMicroservicesAsync();
+  // await app.startAllMicroservicesAsync();
   await app.listen(5010);
-
+  //
   const ebus = app.get(EventBus);
   const cbus = app.get(CommandBus);
-
+  //
   const clogger = new Logger('CommandLogger');
   const elogger = new Logger('EventLogger');
-
+  //
   ebus._subscribe(
     new Subscriber<any>(e => {
       elogger.log(`${inspect(e)}`);
     }),
   );
-
+  //
   cbus._subscribe(
     new Subscriber<any>(e => {
       clogger.log(
@@ -47,13 +47,13 @@ async function bootstrap() {
       );
     }),
   );
-
+  //
   await Promise.all(
     MatchmakingModes.map(t =>
       app.get(QueueRepository).save(t, new QueueReadModel(t)),
     ),
   );
-
+  //
   MatchmakingModes.forEach(t => {
     app.get(EventBus).publish(new QueueUpdatedEvent(t));
   });

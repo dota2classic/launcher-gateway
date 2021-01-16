@@ -2,11 +2,12 @@ import { EventBus, EventsHandler, IEventHandler, QueryBus } from '@nestjs/cqrs';
 import { WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { QueueUpdatedEvent } from '../../gateway/events/queue-updated.event';
-import { QueueStateQuery } from '../../gateway/queries/QueueState/queue-state.query';
-import { QueueStateQueryResult } from '../../gateway/queries/QueueState/queue-state-query.result';
+import { GetQueueStateQuery } from '../../gateway/queries/QueueState/get-queue-state.query';
+import { GetQueueStateQueryResult } from '../../gateway/queries/QueueState/get-queue-state-query.result';
 import { Messages } from '../../socket/messages';
 import { LauncherDeliver } from '../../socket/launcher.deliver';
 import { QueueRepository } from '../repository/queue.repository';
+import { inspect } from 'util';
 
 @EventsHandler(QueueUpdatedEvent)
 export class QueueUpdatedHandler implements IEventHandler<QueueUpdatedEvent> {
@@ -18,21 +19,25 @@ export class QueueUpdatedHandler implements IEventHandler<QueueUpdatedEvent> {
   ) {}
 
   async handle(event: QueueUpdatedEvent) {
-    const qs: QueueStateQueryResult = await this.qbus.execute(
-      new QueueStateQuery(event.mode),
-    );
+    try {
+      const qs: GetQueueStateQueryResult = await this.qbus.execute(
+        new GetQueueStateQuery(event.mode),
+      );
+      //
+      const inQueue = qs.entries
+        .map(t => t.players.length)
+        .reduce((a, b) => a + b, 0);
 
-    const inQueue = qs.entries
-      .map(t => t.players.length)
-      .reduce((a, b) => a + b, 0);
+      const q = await this.qRep.get(event.mode);
+      q.inQueue = inQueue;
+      await this.qRep.save(q.mode, q);
 
-    const q = await this.qRep.get(event.mode);
-    q.inQueue = inQueue;
-    await this.qRep.save(q.mode, q);
-
-    this.launcherDelivery.server.emit(Messages.QUEUE_UPDATE, {
-      mode: event.mode,
-      inQueue,
-    });
+      this.launcherDelivery.server.emit(Messages.QUEUE_UPDATE, {
+        mode: event.mode,
+        inQueue,
+      });
+    }catch (e){
+      console.log(inspect(e))
+    }
   }
 }
