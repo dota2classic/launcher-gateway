@@ -68,3 +68,9 @@ export class PartyInviteReceivedMessage {
 export interface PartyInvite {
   id: string;
 }
+
+
+export interface BrowserSocketAuth {
+  token: string;
+  recaptchaToken: string;
+}

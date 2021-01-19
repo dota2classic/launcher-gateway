@@ -11,7 +11,7 @@ import { QueueRepository } from '../../launcher-gateway/repository/queue.reposit
 import { EventBus, QueryBus } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { Messages } from '../messages';
+import { BrowserSocketAuth, Messages } from '../messages';
 import { steam64to32 } from '../../util/steamIds';
 import { MatchmakingModes } from '../../gateway/shared-types/matchmaking-mode';
 import { GetUserRoomQuery } from '../../gateway/queries/GetUserRoom/get-user-room.query';
@@ -19,11 +19,12 @@ import { GetUserRoomQueryResult } from '../../gateway/queries/GetUserRoom/get-us
 import { PlayerId } from '../../gateway/shared-types/player-id';
 import { GetSessionByUserQuery } from '../../gateway/queries/GetSessionByUser/get-session-by-user.query';
 import { GetSessionByUserQueryResult } from '../../gateway/queries/GetSessionByUser/get-session-by-user-query.result';
-
-import * as jwt_decode from 'jwt-decode';
+import fetch from 'node-fetch';
+import jwt_decode from 'jwt-decode';
 import { PlayerLeaveQueueCommand } from '../../gateway/commands/player-leave-queue.command';
-import Timer = NodeJS.Timer;
 import { LauncherSocket } from '../launcher.deliver';
+import { RECAPTCHA_TOKEN } from '../../config/env';
+import Timer = NodeJS.Timer;
 
 @WebSocketGateway()
 export class AuthGateway implements OnGatewayDisconnect {
@@ -54,16 +55,30 @@ export class AuthGateway implements OnGatewayDisconnect {
 
   @SubscribeMessage(Messages.BROWSER_AUTH)
   async onBrowserAuth(
-    @MessageBody() data: string,
+    @MessageBody() data: BrowserSocketAuth,
     @ConnectedSocket() client: LauncherSocket,
   ) {
-    const parsed = jwt_decode(data);
+    const parsed = jwt_decode<{ sub: string }>(data.token);
 
     // data = token
     client.steam_id = parsed.sub;
     client.playerId = new PlayerId(client.steam_id);
 
-    await this.onClientAuthenticated(client);
+    const recaptchaPassed = await this.verifyRecaptcha(data.recaptchaToken);
+    if (recaptchaPassed) await this.onClientAuthenticated(client);
+  }
+
+  private async verifyRecaptcha(reToken: string) {
+    const url = `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_TOKEN}&response=${reToken}`;
+
+    try {
+      const res = await fetch(url, {
+        method: 'post',
+      }).then(response => response.json());
+      return res.success && res.action === 'socketconnect';
+    } catch (e) {
+      return false;
+    }
   }
 
   async handleDisconnect(client: LauncherSocket) {
