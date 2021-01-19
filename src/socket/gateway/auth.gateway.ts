@@ -20,7 +20,7 @@ import { PlayerId } from '../../gateway/shared-types/player-id';
 import { GetSessionByUserQuery } from '../../gateway/queries/GetSessionByUser/get-session-by-user.query';
 import { GetSessionByUserQueryResult } from '../../gateway/queries/GetSessionByUser/get-session-by-user-query.result';
 import fetch from 'node-fetch';
-import jwt_decode from 'jwt-decode';
+import * as jwt_decode from 'jwt-decode';
 import { PlayerLeaveQueueCommand } from '../../gateway/commands/player-leave-queue.command';
 import { LauncherSocket } from '../launcher.deliver';
 import { RECAPTCHA_TOKEN } from '../../config/env';
@@ -58,6 +58,7 @@ export class AuthGateway implements OnGatewayDisconnect {
     @MessageBody() data: BrowserSocketAuth,
     @ConnectedSocket() client: LauncherSocket,
   ) {
+    // @ts-ignore
     const parsed = jwt_decode<{ sub: string }>(data.token);
 
     // data = token
