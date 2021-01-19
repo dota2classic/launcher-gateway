@@ -15,6 +15,7 @@ import { PartyInviteExpiredHandler } from './event-handler/party-invite-expired.
 import { PartyUpdatedHandler } from './event-handler/party-updated.handler';
 import { GameResultsHandler } from './event-handler/game-results.handler';
 import { MatchStartedHandler } from './event-handler/match-started.handler';
+import { RoomSaga } from './saga/room.saga';
 
 const EventHandlers = [
   QueueUpdatedHandler,
@@ -47,5 +48,6 @@ export const GatewayProviders = [
   ...QueryHandlers,
 
   QueueRepository,
+  RoomSaga
 
 ];

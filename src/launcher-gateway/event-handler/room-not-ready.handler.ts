@@ -18,7 +18,7 @@ export class RoomNotReadyHandler implements IEventHandler<RoomNotReadyEvent> {
       it?.emit(Messages.ROOM_NOT_READY, {
         roomID: event.roomId
       })
-      this.deliver.updateQueue(it)
+      return this.deliver.updateQueue(it)
     });
     await Promise.all(prms)
 

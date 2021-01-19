@@ -16,7 +16,14 @@ export class LauncherDeliver {
   @WebSocketServer()
   public server: Server;
 
+
+
   constructor(private readonly qbus: QueryBus) {}
+
+
+  public get allConnected(): LauncherSocket[]{
+    return Object.values(this.server.sockets.connected).filter((t: LauncherSocket) => !!t.playerId) as LauncherSocket[]
+  }
 
   public find(playerId: PlayerId): LauncherSocket | undefined {
     return Object.values(this.server.sockets.connected).find(
