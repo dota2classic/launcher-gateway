@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { REDIS_PASSWORD, REDIS_URL } from './config/env';
 import { Transport } from '@nestjs/microservices';
 import { MatchmakingModes } from './gateway/shared-types/matchmaking-mode';
-import { CommandBus, EventBus } from '@nestjs/cqrs';
+import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
 import { QueueUpdatedEvent } from './gateway/events/queue-updated.event';
 import { QueueRepository } from './launcher-gateway/repository/queue.repository';
 import { QueueReadModel } from './launcher-gateway/model/queue.read-model';
@@ -24,14 +24,16 @@ async function bootstrap() {
     },
   });
 
-  // await app.startAllMicroservicesAsync();
+  await app.startAllMicroservicesAsync();
   await app.listen(5010);
   //
   const ebus = app.get(EventBus);
   const cbus = app.get(CommandBus);
+  const qbus = app.get(QueryBus);
   //
   const clogger = new Logger('CommandLogger');
   const elogger = new Logger('EventLogger');
+  const qlogger = new Logger('QeuryLogger');
   //
   ebus._subscribe(
     new Subscriber<any>(e => {
@@ -42,6 +44,14 @@ async function bootstrap() {
   cbus._subscribe(
     new Subscriber<any>(e => {
       clogger.log(
+        `${inspect(e)}`,
+        // e.__proto__.constructor.name,
+      );
+    }),
+  );
+  qbus._subscribe(
+    new Subscriber<any>(e => {
+      qlogger.log(
         `${inspect(e)}`,
         // e.__proto__.constructor.name,
       );

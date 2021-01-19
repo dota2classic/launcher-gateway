@@ -34,7 +34,7 @@ import { SentryModule } from '@ntegral/nestjs-sentry';
       },
     ] as any),
   ],
-  // controllers: [GatewayController],
+  controllers: [GatewayController],
   providers: [
     ...GatewayProviders,
 

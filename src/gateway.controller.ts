@@ -15,7 +15,7 @@ import { PartyInviteExpiredEvent } from './gateway/events/party/party-invite-exp
 import { PartyUpdatedEvent } from './gateway/events/party/party-updated.event';
 import { GameResultsEvent } from './gateway/events/gs/game-results.event';
 
-// @Controller()
+@Controller()
 export class GatewayController {
   constructor(private readonly ebus: EventBus) {}
 

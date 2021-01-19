@@ -14,8 +14,8 @@ export class GatewayService implements OnApplicationBootstrap {
     await this.queryCore.connect();
 
     const publicEvents: any[] = [ReadyStateReceivedEvent];
-    // this.ebus
-    //   .pipe(ofType(...publicEvents))
-    //   .subscribe(t => this.queryCore.emit(t.constructor.name, t));
+    this.ebus
+      .pipe(ofType(...publicEvents))
+      .subscribe(t => this.queryCore.emit(t.constructor.name, t));
   }
 }
