@@ -16,6 +16,7 @@ import { PartyUpdatedHandler } from './event-handler/party-updated.handler';
 import { GameResultsHandler } from './event-handler/game-results.handler';
 import { MatchStartedHandler } from './event-handler/match-started.handler';
 import { RoomSaga } from './saga/room.saga';
+import { SyncQueueStateHandler } from './event-handler/sync-queue-state.handler';
 
 const EventHandlers = [
   QueueUpdatedHandler,
@@ -31,7 +32,8 @@ const EventHandlers = [
   GameResultsHandler,
 
   PartyInviteExpiredHandler,
-  PartyUpdatedHandler
+  PartyUpdatedHandler,
+  SyncQueueStateHandler
 ];
 
 const QueryHandlers = [

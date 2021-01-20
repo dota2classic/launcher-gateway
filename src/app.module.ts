@@ -10,6 +10,7 @@ import { AuthGateway } from './socket/gateway/auth.gateway';
 import { QueueGateway } from './socket/gateway/queue.gateway';
 import { PartyGateway } from './socket/gateway/party.gateway';
 import { SentryModule } from '@ntegral/nestjs-sentry';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SentryModule } from '@ntegral/nestjs-sentry';
     //   environment: isDev ? "dev" : "production",
     //   logLevel: 2, //based on sentry.io loglevel //
     // }),
+    ScheduleModule.forRoot(),
     CqrsModule,
     ClientsModule.register([
       {

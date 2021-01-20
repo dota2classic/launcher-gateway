@@ -42,16 +42,16 @@ export class AuthGateway implements OnGatewayDisconnect {
     @Inject('QueryCore') private readonly redis: ClientProxy,
   ) {}
 
-  @SubscribeMessage(Messages.AUTH)
-  async onAuth(
-    @MessageBody() data: string,
-    @ConnectedSocket() client: LauncherSocket,
-  ) {
-    client.steam_id = steam64to32(data);
-    client.playerId = new PlayerId(client.steam_id);
-
-    await this.onClientAuthenticated(client);
-  }
+  // @SubscribeMessage(Messages.AUTH)
+  // async onAuth(
+  //   @MessageBody() data: string,
+  //   @ConnectedSocket() client: LauncherSocket,
+  // ) {
+  //   client.steam_id = steam64to32(data);
+  //   client.playerId = new PlayerId(client.steam_id);
+  //
+  //   await this.onClientAuthenticated(client);
+  // }
 
   @SubscribeMessage(Messages.BROWSER_AUTH)
   async onBrowserAuth(

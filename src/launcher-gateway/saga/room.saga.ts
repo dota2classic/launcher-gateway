@@ -8,7 +8,7 @@ export class RoomSaga {
   constructor(private readonly ebus: EventBus) {}
 
   // each 5 seconds
-  @Cron('0 */5 * * * *')
+  @Cron('*/5 * * * * *')
   async checkBotGame() {
     this.ebus.publish(new SyncQueueStateEvent());
   }
