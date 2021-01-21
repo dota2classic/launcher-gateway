@@ -1,6 +1,7 @@
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
@@ -12,7 +13,6 @@ import { EventBus, QueryBus } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { BrowserSocketAuth, Messages } from '../messages';
-import { steam64to32 } from '../../util/steamIds';
 import { MatchmakingModes } from '../../gateway/shared-types/matchmaking-mode';
 import { GetUserRoomQuery } from '../../gateway/queries/GetUserRoom/get-user-room.query';
 import { GetUserRoomQueryResult } from '../../gateway/queries/GetUserRoom/get-user-room-query.result';
@@ -20,14 +20,14 @@ import { PlayerId } from '../../gateway/shared-types/player-id';
 import { GetSessionByUserQuery } from '../../gateway/queries/GetSessionByUser/get-session-by-user.query';
 import { GetSessionByUserQueryResult } from '../../gateway/queries/GetSessionByUser/get-session-by-user-query.result';
 import fetch from 'node-fetch';
-import * as jwt_decode from 'jwt-decode';
 import { PlayerLeaveQueueCommand } from '../../gateway/commands/player-leave-queue.command';
 import { LauncherSocket } from '../launcher.deliver';
 import { RECAPTCHA_TOKEN } from '../../config/env';
 import Timer = NodeJS.Timer;
+import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway()
-export class AuthGateway implements OnGatewayDisconnect {
+export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
   @WebSocketServer()
   server: Server;
 
@@ -39,34 +39,45 @@ export class AuthGateway implements OnGatewayDisconnect {
     private readonly qRep: QueueRepository,
     private readonly ebus: EventBus,
     private readonly qbus: QueryBus,
+    private readonly jwtService: JwtService,
     @Inject('QueryCore') private readonly redis: ClientProxy,
   ) {}
 
-  // @SubscribeMessage(Messages.AUTH)
-  // async onAuth(
-  //   @MessageBody() data: string,
-  //   @ConnectedSocket() client: LauncherSocket,
-  // ) {
-  //   client.steam_id = steam64to32(data);
-  //   client.playerId = new PlayerId(client.steam_id);
-  //
-  //   await this.onClientAuthenticated(client);
-  // }
+  handleConnection(client: LauncherSocket, ...args): any {
+    setTimeout(() => {
+      // 5 secs no token = drop
+      if (!client.playerId) {
+        client.disconnect();
+      }
+    }, 5000);
+  }
 
   @SubscribeMessage(Messages.BROWSER_AUTH)
   async onBrowserAuth(
     @MessageBody() data: BrowserSocketAuth,
     @ConnectedSocket() client: LauncherSocket,
   ) {
-    // @ts-ignore
-    const parsed = jwt_decode<{ sub: string }>(data.token);
+    try {
 
-    // data = token
-    client.steam_id = parsed.sub;
-    client.playerId = new PlayerId(client.steam_id);
 
-    const recaptchaPassed = await this.verifyRecaptcha(data.recaptchaToken);
-    if (recaptchaPassed) await this.onClientAuthenticated(client);
+      const parsed = this.jwtService.verify<{ sub: string }>(data.token);
+
+      console.log(parsed)
+
+      // data = token
+      client.steam_id = parsed.sub;
+      client.playerId = new PlayerId(client.steam_id);
+
+      const recaptchaPassed = await this.verifyRecaptcha(data.recaptchaToken);
+      if (recaptchaPassed) {
+        await this.onClientAuthenticated(client);
+      } else {
+        client.disconnect();
+      }
+    } catch (e) {
+      console.log(e)
+      client.disconnect();
+    }
   }
 
   private async verifyRecaptcha(reToken: string) {

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { isDev, REDIS_PASSWORD, REDIS_URL } from './config/env';
+import { isDev, JWT_SECRET, REDIS_PASSWORD, REDIS_URL } from './config/env';
 import { GatewayProviders } from './launcher-gateway';
 import { GatewayController } from './gateway.controller';
 import { LauncherDeliver } from './socket/launcher.deliver';
@@ -11,6 +11,7 @@ import { QueueGateway } from './socket/gateway/queue.gateway';
 import { PartyGateway } from './socket/gateway/party.gateway';
 import { SentryModule } from '@ntegral/nestjs-sentry';
 import { ScheduleModule } from '@nestjs/schedule';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -21,6 +22,10 @@ import { ScheduleModule } from '@nestjs/schedule';
     //   environment: isDev ? "dev" : "production",
     //   logLevel: 2, //based on sentry.io loglevel //
     // }),
+    JwtModule.register({
+      secret: JWT_SECRET,
+      signOptions: { expiresIn: '10 days' },
+    }),
     ScheduleModule.forRoot(),
     CqrsModule,
     ClientsModule.register([
