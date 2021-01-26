@@ -23,8 +23,8 @@ import fetch from 'node-fetch';
 import { PlayerLeaveQueueCommand } from '../../gateway/commands/player-leave-queue.command';
 import { LauncherSocket } from '../launcher.deliver';
 import { RECAPTCHA_TOKEN } from '../../config/env';
-import Timer = NodeJS.Timer;
 import { JwtService } from '@nestjs/jwt';
+import Timer = NodeJS.Timer;
 
 @WebSocketGateway()
 export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
@@ -58,24 +58,15 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
     @ConnectedSocket() client: LauncherSocket,
   ) {
     try {
-
-
       const parsed = this.jwtService.verify<{ sub: string }>(data.token);
-
-      console.log(parsed)
 
       // data = token
       client.steam_id = parsed.sub;
       client.playerId = new PlayerId(client.steam_id);
 
-      const recaptchaPassed = await this.verifyRecaptcha(data.recaptchaToken);
-      if (recaptchaPassed) {
-        await this.onClientAuthenticated(client);
-      } else {
-        client.disconnect();
-      }
+      await this.onClientAuthenticated(client);
     } catch (e) {
-      console.log(e)
+      console.log(e);
       client.disconnect();
     }
   }
@@ -95,7 +86,15 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
 
   async handleDisconnect(client: LauncherSocket) {
     // here on disconnect we start timer
-    return this.startDisconnectCountdown(client);
+
+    const totalConnections = Object.values(
+      this.server.sockets.connected,
+    ).filter(
+      (it: LauncherSocket) => it.steam_id === client.steam_id,
+    ) as LauncherSocket[];
+
+    if (totalConnections.length === 0)
+      return this.startDisconnectCountdown(client);
   }
 
   private async stopDisconnectCountdown(client: LauncherSocket) {
@@ -136,6 +135,7 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
       });
     });
 
+    client.emit(Messages.AUTH, { success: true });
     // this thing is for "ready check state"
     const roomState = await this.getRoomState(client.playerId);
     client.emit(Messages.ROOM_STATE, roomState?.info);
