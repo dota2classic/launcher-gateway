@@ -66,7 +66,7 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
 
       await this.onClientAuthenticated(client);
     } catch (e) {
-      console.log(e);
+      client.emit(Messages.BAD_AUTH)
       client.disconnect();
     }
   }

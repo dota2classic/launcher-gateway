@@ -22,6 +22,7 @@ export enum Messages {
   ACCEPT_PARTY_INVITE = "ACCEPT_PARTY_INVITE",
   LEAVE_PARTY = "LEAVE_PARTY",
   PARTY_UPDATED = "PARTY_UPDATED",
+  BAD_AUTH = 'BAD_AUTH',
 }
 
 export interface ReadyCheckUpdate {
