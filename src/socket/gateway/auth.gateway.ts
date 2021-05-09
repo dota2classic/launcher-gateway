@@ -25,6 +25,7 @@ import { LauncherSocket } from '../launcher.deliver';
 import { RECAPTCHA_TOKEN } from '../../config/env';
 import { JwtService } from '@nestjs/jwt';
 import { Dota2Version } from '../../gateway/shared-types/dota2version';
+import { QueueReadModel } from '../../launcher-gateway/model/queue.read-model';
 import Timer = NodeJS.Timer;
 
 @WebSocketGateway()
@@ -139,7 +140,14 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
     MatchmakingModes.map(t => {
       client.emit(Messages.QUEUE_UPDATE, {
         mode: t,
-        inQueue: this.qRep.get(t).inQueue,
+        version: Dota2Version.Dota_681,
+        inQueue: this.qRep.get(QueueReadModel.id(t, Dota2Version.Dota_681)).inQueue,
+      });
+
+      client.emit(Messages.QUEUE_UPDATE, {
+        mode: t,
+        version: Dota2Version.Dota_684,
+        inQueue: this.qRep.get(QueueReadModel.id(t, Dota2Version.Dota_684)).inQueue,
       });
     });
 

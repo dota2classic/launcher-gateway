@@ -4,7 +4,8 @@ import { Injectable } from '@nestjs/common';
 import { EventPublisher } from '@nestjs/cqrs';
 
 @Injectable()
-export class QueueRepository extends RuntimeRepository<QueueReadModel, 'mode'>{
+export class QueueRepository extends RuntimeRepository<QueueReadModel, 'id'>{
+
   constructor(publisher: EventPublisher) {
     super(publisher);
   }

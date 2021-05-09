@@ -60,8 +60,10 @@ async function bootstrap() {
   );
   //
   await Promise.all(
-    MatchmakingModes.map(t =>
-      app.get(QueueRepository).save(t, new QueueReadModel(t)),
+    MatchmakingModes.map(t => {
+        app.get(QueueRepository).save(QueueReadModel.id(t, Dota2Version.Dota_681), new QueueReadModel(t, Dota2Version.Dota_681))
+        app.get(QueueRepository).save(QueueReadModel.id(t, Dota2Version.Dota_684), new QueueReadModel(t, Dota2Version.Dota_684))
+      }
     ),
   );
   //
