@@ -21,7 +21,7 @@ export class QueueUpdatedHandler implements IEventHandler<QueueUpdatedEvent> {
   async handle(event: QueueUpdatedEvent) {
     try {
       const qs: GetQueueStateQueryResult = await this.qbus.execute(
-        new GetQueueStateQuery(event.mode),
+        new GetQueueStateQuery(event.mode, event.version),
       );
       //
       const inQueue = qs.entries

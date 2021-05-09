@@ -1,7 +1,6 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -16,8 +15,12 @@ import { PlayerEnterQueueCommand } from '../../gateway/commands/player-enter-que
 import { PlayerId } from '../../gateway/shared-types/player-id';
 import { MatchmakingModes } from '../../gateway/shared-types/matchmaking-mode';
 import { PlayerLeaveQueueCommand } from '../../gateway/commands/player-leave-queue.command';
-import { ReadyState, ReadyStateReceivedEvent } from '../../gateway/events/ready-state-received.event';
+import {
+  ReadyState,
+  ReadyStateReceivedEvent,
+} from '../../gateway/events/ready-state-received.event';
 import { LauncherSocket } from '../launcher.deliver';
+import { Dota2Version } from '../../gateway/shared-types/dota2version';
 
 @WebSocketGateway()
 export class QueueGateway {
@@ -31,8 +34,6 @@ export class QueueGateway {
     @Inject('QueryCore') private readonly redis: ClientProxy,
   ) {}
 
-
-
   @SubscribeMessage(Messages.ENTER_QUEUE)
   async onEnterQueue(
     @MessageBody() data: EnterQueue,
@@ -41,26 +42,41 @@ export class QueueGateway {
     await this.redis
       .emit(
         PlayerEnterQueueCommand.name,
-        new PlayerEnterQueueCommand(new PlayerId(client.steam_id), data.mode, data.version),
+        new PlayerEnterQueueCommand(
+          new PlayerId(client.steam_id),
+          data.mode,
+          data.version,
+        ),
       )
       .toPromise();
   }
 
   @SubscribeMessage(Messages.LEAVE_ALL_QUEUES)
   async leaveAllQueues(@ConnectedSocket() client: LauncherSocket) {
-    const cmds = MatchmakingModes.map(mode =>
+    const cmds = MatchmakingModes.flatMap(mode => [
       this.redis
         .emit(
           PlayerLeaveQueueCommand.name,
-          new PlayerLeaveQueueCommand(new PlayerId(client.steam_id), mode),
+          new PlayerLeaveQueueCommand(
+            new PlayerId(client.steam_id),
+            mode,
+            Dota2Version.Dota_681,
+          ),
         )
         .toPromise(),
-    );
+      this.redis
+        .emit(
+          PlayerLeaveQueueCommand.name,
+          new PlayerLeaveQueueCommand(
+            new PlayerId(client.steam_id),
+            mode,
+            Dota2Version.Dota_684,
+          ),
+        )
+        .toPromise(),
+    ]);
     await Promise.all(cmds);
   }
-
-
-
 
   @SubscribeMessage(Messages.SET_READY_CHECK)
   async acceptGame(

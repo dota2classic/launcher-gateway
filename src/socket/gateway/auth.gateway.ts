@@ -24,6 +24,7 @@ import { PlayerLeaveQueueCommand } from '../../gateway/commands/player-leave-que
 import { LauncherSocket } from '../launcher.deliver';
 import { RECAPTCHA_TOKEN } from '../../config/env';
 import { JwtService } from '@nestjs/jwt';
+import { Dota2Version } from '../../gateway/shared-types/dota2version';
 import Timer = NodeJS.Timer;
 
 @WebSocketGateway()
@@ -105,13 +106,20 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
   }
 
   private async disconnectAction(playerId: PlayerId) {
-    const cmds = MatchmakingModes.map(mode =>
+    const cmds = MatchmakingModes.flatMap(mode => [
       this.redis
         .emit(
           PlayerLeaveQueueCommand.name,
-          new PlayerLeaveQueueCommand(playerId, mode),
+          new PlayerLeaveQueueCommand(playerId, mode, Dota2Version.Dota_681),
         )
         .toPromise(),
+      this.redis
+        .emit(
+          PlayerLeaveQueueCommand.name,
+          new PlayerLeaveQueueCommand(playerId, mode, Dota2Version.Dota_681),
+        )
+        .toPromise()
+      ]
     );
     return Promise.all(cmds);
   }
