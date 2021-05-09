@@ -41,7 +41,7 @@ export class QueueGateway {
     await this.redis
       .emit(
         PlayerEnterQueueCommand.name,
-        new PlayerEnterQueueCommand(new PlayerId(client.steam_id), data.mode),
+        new PlayerEnterQueueCommand(new PlayerId(client.steam_id), data.mode, data.version),
       )
       .toPromise();
   }

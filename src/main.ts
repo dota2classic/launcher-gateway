@@ -10,6 +10,7 @@ import { QueueReadModel } from './launcher-gateway/model/queue.read-model';
 import { inspect } from 'util';
 import { Subscriber } from 'rxjs';
 import { Logger } from '@nestjs/common';
+import { Dota2Version } from './gateway/shared-types/dota2version';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -65,7 +66,8 @@ async function bootstrap() {
   );
   //
   MatchmakingModes.forEach(t => {
-    app.get(EventBus).publish(new QueueUpdatedEvent(t));
+    app.get(EventBus).publish(new QueueUpdatedEvent(t, Dota2Version.Dota_681));
+    app.get(EventBus).publish(new QueueUpdatedEvent(t, Dota2Version.Dota_684));
   });
 }
 bootstrap();

@@ -1,4 +1,5 @@
 import { MatchmakingMode } from '../gateway/shared-types/matchmaking-mode';
+import { Dota2Version } from '../gateway/shared-types/dota2version';
 
 export enum Messages {
   AUTH = 'AUTH',
@@ -39,6 +40,7 @@ export interface UpdateQueue {
 
 export interface EnterQueue {
   mode: MatchmakingMode;
+  version: Dota2Version;
 }
 
 export interface GameFound {

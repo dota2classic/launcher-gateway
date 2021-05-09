@@ -20,7 +20,10 @@ export class SyncQueueStateHandler
         GetUserQueueQueryResult
       >(new GetUserQueueQuery(p.playerId));
 
-      this.deliver.deliver(p.playerId, Messages.QUEUE_STATE, s.mode);
+      this.deliver.deliver(p.playerId, Messages.QUEUE_STATE, {
+        mode: s.mode,
+        version: s.version,
+      });
     });
   }
 }

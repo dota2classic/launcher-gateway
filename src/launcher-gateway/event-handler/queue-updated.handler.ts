@@ -34,6 +34,7 @@ export class QueueUpdatedHandler implements IEventHandler<QueueUpdatedEvent> {
 
       this.launcherDelivery.server.emit(Messages.QUEUE_UPDATE, {
         mode: event.mode,
+        version: event.version,
         inQueue,
       });
     }catch (e){
