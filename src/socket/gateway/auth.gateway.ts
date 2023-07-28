@@ -46,6 +46,7 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
   ) {}
 
   handleConnection(client: LauncherSocket, ...args): any {
+    console.log("niggers")
     setTimeout(() => {
       // 5 secs no token = drop
       if (!client.playerId) {
