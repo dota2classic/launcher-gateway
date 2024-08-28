@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { REDIS_PASSWORD, REDIS_URL } from './config/env';
+import { REDIS_HOST, REDIS_PASSWORD } from './config/env';
 import { Transport } from '@nestjs/microservices';
 import { MatchmakingModes } from './gateway/shared-types/matchmaking-mode';
 import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
@@ -8,7 +8,6 @@ import { QueueUpdatedEvent } from './gateway/events/queue-updated.event';
 import { QueueRepository } from './launcher-gateway/repository/queue.repository';
 import { QueueReadModel } from './launcher-gateway/model/queue.read-model';
 import { inspect } from 'util';
-import { Subscriber } from 'rxjs';
 import { Logger } from '@nestjs/common';
 import { Dota2Version } from './gateway/shared-types/dota2version';
 
@@ -18,14 +17,14 @@ async function bootstrap() {
   app.connectMicroservice({
     transport: Transport.REDIS,
     options: {
-      url: REDIS_URL(),
+      host: REDIS_HOST(),
       retryAttempts: Infinity,
       password: REDIS_PASSWORD(),
       retryDelay: 5000,
     },
   });
 
-  await app.startAllMicroservicesAsync();
+  await app.startAllMicroservices();
   await app.listen(5010);
   //
   const ebus = app.get(EventBus);
@@ -36,28 +35,24 @@ async function bootstrap() {
   const elogger = new Logger('EventLogger');
   const qlogger = new Logger('QeuryLogger');
   //
-  ebus._subscribe(
-    new Subscriber<any>(e => {
-      elogger.log(`${inspect(e)}`);
-    }),
-  );
+ebus.subscribe(e => {
+  elogger.log(`${inspect(e)}`);
+});
   //
-  cbus._subscribe(
-    new Subscriber<any>(e => {
-      clogger.log(
-        `${inspect(e)}`,
-        // e.__proto__.constructor.name,
-      );
-    }),
-  );
-  qbus._subscribe(
-    new Subscriber<any>(e => {
+  cbus.subscribe(e => {
+    clogger.log(
+      `${inspect(e)}`,
+      // e.__proto__.constructor.name,
+    );
+  })
+  qbus.subscribe(
+    e => {
       qlogger.log(
         `${inspect(e)}`,
         // e.__proto__.constructor.name,
       );
-    }),
-  );
+    }
+  )
   //
   await Promise.all(
     MatchmakingModes.map(t => {
@@ -71,5 +66,8 @@ async function bootstrap() {
     app.get(EventBus).publish(new QueueUpdatedEvent(t, Dota2Version.Dota_681));
     app.get(EventBus).publish(new QueueUpdatedEvent(t, Dota2Version.Dota_684));
   });
+
+  // @ts-ignore
+  console.log('Started gateway')
 }
 bootstrap();

@@ -22,17 +22,18 @@ export class LauncherDeliver {
 
 
   public get allConnected(): LauncherSocket[]{
-    return Object.values(this.server.sockets.connected).filter((t: LauncherSocket) => !!t.playerId) as LauncherSocket[]
+    return Object.values(this.server.sockets.sockets).filter((t: LauncherSocket) => !!t.playerId) as LauncherSocket[]
   }
 
   public find(playerId: PlayerId): LauncherSocket | undefined {
-    return Object.values(this.server.sockets.connected).find(
+    return Object.values(this.server.sockets.sockets).find(
       (it: LauncherSocket) => it.steam_id === playerId.value,
     ) as LauncherSocket;
   }
 
   public findAll(playerId: PlayerId): LauncherSocket[] {
-    return Object.values(this.server.sockets.connected).filter(
+
+    return Object.values(this.server.sockets.sockets).filter(
       (it: LauncherSocket) => it.steam_id === playerId.value,
     ) as LauncherSocket[];
   }

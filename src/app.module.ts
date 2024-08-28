@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { isDev, JWT_SECRET, REDIS_PASSWORD, REDIS_URL } from './config/env';
+import { JWT_SECRET, REDIS_HOST, REDIS_PASSWORD } from './config/env';
 import { GatewayProviders } from './launcher-gateway';
 import { GatewayController } from './gateway.controller';
 import { LauncherDeliver } from './socket/launcher.deliver';
@@ -9,7 +9,6 @@ import { GatewayService } from './gateway.service';
 import { AuthGateway } from './socket/gateway/auth.gateway';
 import { QueueGateway } from './socket/gateway/queue.gateway';
 import { PartyGateway } from './socket/gateway/party.gateway';
-import { SentryModule } from '@ntegral/nestjs-sentry';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JwtModule } from '@nestjs/jwt';
 
@@ -33,7 +32,7 @@ import { JwtModule } from '@nestjs/jwt';
         name: 'QueryCore',
         transport: Transport.REDIS,
         options: {
-          url: REDIS_URL(),
+          host: REDIS_HOST(),
           password: REDIS_PASSWORD(),
           retryAttempts: Infinity,
           retryDelay: 5000,

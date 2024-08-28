@@ -26,7 +26,6 @@ import { RECAPTCHA_TOKEN } from '../../config/env';
 import { JwtService } from '@nestjs/jwt';
 import { Dota2Version } from '../../gateway/shared-types/dota2version';
 import { QueueReadModel } from '../../launcher-gateway/model/queue.read-model';
-import Timer = NodeJS.Timer;
 
 @WebSocketGateway()
 export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
@@ -34,7 +33,7 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
   server: Server;
 
   private disconnectConsiderLeaver: {
-    [key: string]: Timer;
+    [key: string]: number;
   } = {};
 
   constructor(
@@ -91,7 +90,7 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
     // here on disconnect we start timer
 
     const totalConnections = Object.values(
-      this.server.sockets.connected,
+      this.server.sockets.sockets,
     ).filter(
       (it: LauncherSocket) => it.steam_id === client.steam_id,
     ) as LauncherSocket[];
@@ -131,7 +130,7 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
       this.disconnectAction(client.playerId);
     }, 60_000);
     await this.stopDisconnectCountdown(client);
-    this.disconnectConsiderLeaver[client.steam_id] = timer;
+    this.disconnectConsiderLeaver[client.steam_id] = timer as unknown as number;
   }
 
   private async onClientAuthenticated(client: LauncherSocket) {
