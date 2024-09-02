@@ -8,7 +8,7 @@ export class MatchFinishedHandler implements IEventHandler<MatchFinishedEvent> {
   constructor(private readonly deliver: LauncherDeliver) {}
 
   async handle(event: MatchFinishedEvent) {
-    const players = [...event.info.radiant].concat(event.info.dire);
+    const players = event.info.players.map(it => it.playerId);
 
     this.deliver.deliver(players, Messages.MATCH_FINISHED, {
       roomId: event.info.roomId,

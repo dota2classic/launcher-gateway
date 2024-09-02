@@ -8,7 +8,7 @@ export class MatchStartedHandler implements IEventHandler<MatchStartedEvent> {
   constructor(private readonly deliver: LauncherDeliver) {}
 
   async handle(event: MatchStartedEvent) {
-    const players = [...event.info.radiant].concat(event.info.dire);
+    const players = event.info.players.map(it => it.playerId);
 
     await new Promise(r => setTimeout(r, 5000));
 
