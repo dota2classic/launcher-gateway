@@ -1,10 +1,4 @@
-import {
-  ConnectedSocket,
-  MessageBody,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { QueueRepository } from '../../launcher-gateway/repository/queue.repository';
 import { EventBus, QueryBus } from '@nestjs/cqrs';
@@ -17,7 +11,11 @@ import { PlayerId } from '../../gateway/shared-types/player-id';
 import { PartyInviteAcceptedEvent } from '../../gateway/events/party/party-invite-accepted.event';
 import { PartyLeaveRequestedEvent } from '../../gateway/events/party/party-leave-requested.event';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class PartyGateway {
   @WebSocketServer()
   server: Server;

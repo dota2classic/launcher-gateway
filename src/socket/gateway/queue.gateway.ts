@@ -1,10 +1,4 @@
-import {
-  ConnectedSocket,
-  MessageBody,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { QueueRepository } from '../../launcher-gateway/repository/queue.repository';
 import { EventBus, QueryBus } from '@nestjs/cqrs';
@@ -15,14 +9,15 @@ import { PlayerEnterQueueCommand } from '../../gateway/commands/player-enter-que
 import { PlayerId } from '../../gateway/shared-types/player-id';
 import { MatchmakingModes } from '../../gateway/shared-types/matchmaking-mode';
 import { PlayerLeaveQueueCommand } from '../../gateway/commands/player-leave-queue.command';
-import {
-  ReadyState,
-  ReadyStateReceivedEvent,
-} from '../../gateway/events/ready-state-received.event';
+import { ReadyState, ReadyStateReceivedEvent } from '../../gateway/events/ready-state-received.event';
 import { LauncherSocket } from '../launcher.deliver';
 import { Dota2Version } from '../../gateway/shared-types/dota2version';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class QueueGateway {
   @WebSocketServer()
   server: Server;

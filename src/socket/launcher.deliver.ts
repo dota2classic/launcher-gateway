@@ -11,7 +11,11 @@ export interface LauncherSocket extends Socket {
   playerId: PlayerId;
 }
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class LauncherDeliver {
   @WebSocketServer()
   public server: Server;
