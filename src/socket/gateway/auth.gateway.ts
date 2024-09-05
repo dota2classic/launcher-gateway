@@ -27,7 +27,11 @@ import { JwtService } from '@nestjs/jwt';
 import { Dota2Version } from '../../gateway/shared-types/dota2version';
 import { QueueReadModel } from '../../launcher-gateway/model/queue.read-model';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
   @WebSocketServer()
   server: Server;
@@ -45,7 +49,6 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
   ) {}
 
   handleConnection(client: LauncherSocket, ...args): any {
-    console.log("niggers")
     setTimeout(() => {
       // 5 secs no token = drop
       if (!client.playerId) {
