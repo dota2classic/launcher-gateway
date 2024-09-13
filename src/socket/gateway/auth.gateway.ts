@@ -92,9 +92,7 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
   async handleDisconnect(client: LauncherSocket) {
     // here on disconnect we start timer
 
-    const totalConnections = Object.values(
-      this.server.sockets.sockets,
-    ).filter(
+    const totalConnections = Array.from(this.server.sockets.sockets.values()).filter(
       (it: LauncherSocket) => it.steam_id === client.steam_id,
     ) as LauncherSocket[];
 
