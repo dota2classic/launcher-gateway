@@ -118,7 +118,7 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
       this.redis
         .emit(
           PlayerLeaveQueueCommand.name,
-          new PlayerLeaveQueueCommand(playerId, mode, Dota2Version.Dota_681),
+          new PlayerLeaveQueueCommand(playerId, mode, Dota2Version.Dota_684),
         )
         .toPromise()
       ]
