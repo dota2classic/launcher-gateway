@@ -48,22 +48,10 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
     @Inject('QueryCore') private readonly redis: ClientProxy,
   ) {}
 
-  handleConnection(client: LauncherSocket, ...args): any {
-    setTimeout(() => {
-      // 5 secs no token = drop
-      if (!client.playerId) {
-        client.disconnect();
-      }
-    }, 5000);
-  }
-
-  @SubscribeMessage(Messages.BROWSER_AUTH)
-  async onBrowserAuth(
-    @MessageBody() data: BrowserSocketAuth,
-    @ConnectedSocket() client: LauncherSocket,
-  ) {
+  async handleConnection(client: LauncherSocket, ...args) {
+    const authToken = client.handshake.auth?.token;
     try {
-      const parsed = this.jwtService.verify<{ sub: string }>(data.token);
+      const parsed = this.jwtService.verify<{ sub: string }>(authToken);
 
       // data = token
       client.steam_id = parsed.sub;
@@ -74,6 +62,14 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
       client.emit(Messages.BAD_AUTH)
       client.disconnect();
     }
+  }
+
+  @SubscribeMessage(Messages.BROWSER_AUTH)
+  async onBrowserAuth(
+    @MessageBody() data: BrowserSocketAuth,
+    @ConnectedSocket() client: LauncherSocket,
+  ) {
+
   }
 
   private async verifyRecaptcha(reToken: string) {
