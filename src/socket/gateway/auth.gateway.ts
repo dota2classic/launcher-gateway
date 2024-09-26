@@ -94,6 +94,9 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
 
     if (totalConnections.length === 0)
       return this.startDisconnectCountdown(client);
+
+
+    await this.updateOnline();
   }
 
   private async stopDisconnectCountdown(client: LauncherSocket) {
@@ -156,6 +159,9 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
     // this thing is for "current match"
     const matchState = await this.getMatchState(client.playerId);
     client.emit(Messages.MATCH_STATE, matchState?.serverUrl);
+
+    await this.updateOnline();
+
   }
 
   private async getMatchState(playerId: PlayerId) {
@@ -169,5 +175,20 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
     return await this.qbus.execute<GetUserRoomQuery, GetUserRoomQueryResult>(
       new GetUserRoomQuery(playerId),
     );
+  }
+
+  private async updateOnline(socket?: LauncherSocket){
+
+    const clients = new Set(Array.from(this.server.sockets.sockets.values()).map((it: LauncherSocket) => it.steam_id));
+
+    const evt: any = {
+      online: clients.size
+    };
+    if(socket){
+      socket.emit(Messages.ONLINE_UPDATE, evt)
+    }else {
+      this.server.emit(Messages.ONLINE_UPDATE, evt)
+    }
+
   }
 }

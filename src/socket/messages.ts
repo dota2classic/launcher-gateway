@@ -24,6 +24,7 @@ export enum Messages {
   LEAVE_PARTY = "LEAVE_PARTY",
   PARTY_UPDATED = "PARTY_UPDATED",
   BAD_AUTH = 'BAD_AUTH',
+  ONLINE_UPDATE = 'ONLINE_UPDATE',
 }
 
 export interface ReadyCheckUpdate {
