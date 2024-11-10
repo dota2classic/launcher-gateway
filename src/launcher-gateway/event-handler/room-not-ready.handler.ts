@@ -13,7 +13,7 @@ export class RoomNotReadyHandler implements IEventHandler<RoomNotReadyEvent> {
     // this.deliver.deliver(event.players, Messages.ROOM_NOT_READY, {
     //   roomID: event.roomId
     // });
-    const sockets = event.players.map(t => this.deliver.find(t))
+    const sockets = event.players.flatMap(t => this.deliver.findAll(t))
     const prms = sockets.map(it => {
       it?.emit(Messages.ROOM_NOT_READY, {
         roomID: event.roomId

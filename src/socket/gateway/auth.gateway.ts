@@ -21,7 +21,7 @@ import { GetSessionByUserQuery } from '../../gateway/queries/GetSessionByUser/ge
 import { GetSessionByUserQueryResult } from '../../gateway/queries/GetSessionByUser/get-session-by-user-query.result';
 import fetch from 'node-fetch';
 import { PlayerLeaveQueueCommand } from '../../gateway/commands/player-leave-queue.command';
-import { LauncherSocket } from '../launcher.deliver';
+import { LauncherDeliver, LauncherSocket } from '../launcher.deliver';
 import { RECAPTCHA_TOKEN } from '../../config/env';
 import { JwtService } from '@nestjs/jwt';
 import { Dota2Version } from '../../gateway/shared-types/dota2version';
@@ -45,6 +45,7 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
     private readonly ebus: EventBus,
     private readonly qbus: QueryBus,
     private readonly jwtService: JwtService,
+    private readonly deliver: LauncherDeliver,
     @Inject('QueryCore') private readonly redis: ClientProxy,
   ) {}
 
@@ -152,6 +153,9 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
     });
 
     client.emit(Messages.AUTH, { success: true });
+    // This thing is for what queue are we in?
+    await this.deliver.updateQueue(client)
+
     // this thing is for "ready check state"
     const roomState = await this.getRoomState(client.playerId);
     client.emit(Messages.ROOM_STATE, roomState?.info);
