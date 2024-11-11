@@ -26,6 +26,11 @@ import { RECAPTCHA_TOKEN } from '../../config/env';
 import { JwtService } from '@nestjs/jwt';
 import { Dota2Version } from '../../gateway/shared-types/dota2version';
 import { QueueReadModel } from '../../launcher-gateway/model/queue.read-model';
+import { GetPartyInvitationsQuery } from '../../gateway/queries/GetPartyInvitations/get-party-invitations.query';
+import {
+  GetPartyInvitationsQueryResult,
+} from '../../gateway/queries/GetPartyInvitations/get-party-invitations-query.result';
+import { PartyInviteCreatedEvent } from '../../gateway/events/party/party-invite-created.event';
 
 @WebSocketGateway({
   cors: {
@@ -156,6 +161,16 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
     // This thing is for what queue are we in?
     await this.deliver.updateQueue(client)
 
+    // This thing is for "party invites
+    const partyInvState = await this.getPartyInviteStates(client.playerId);
+    this.ebus.publishAll(partyInvState.invitations.map(x => new PartyInviteCreatedEvent(
+      x.id,
+      x.partyId,
+      x.leaderId,
+      x.invited
+    )))
+
+
     // this thing is for "ready check state"
     const roomState = await this.getRoomState(client.playerId);
     client.emit(Messages.ROOM_STATE, roomState?.info);
@@ -179,6 +194,12 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
     return await this.qbus.execute<GetUserRoomQuery, GetUserRoomQueryResult>(
       new GetUserRoomQuery(playerId),
     );
+  }
+
+  private async getPartyInviteStates(playerId: PlayerId){
+    return this.qbus.execute<GetPartyInvitationsQuery, GetPartyInvitationsQueryResult>(
+      new GetPartyInvitationsQuery(playerId)
+    )
   }
 
   private async updateOnline(socket?: LauncherSocket){

@@ -17,6 +17,7 @@ import { GameResultsHandler } from './event-handler/game-results.handler';
 import { MatchStartedHandler } from './event-handler/match-started.handler';
 import { RoomSaga } from './saga/room.saga';
 import { SyncQueueStateHandler } from './event-handler/sync-queue-state.handler';
+import { GetPartyInvitationsQuery } from '../gateway/queries/GetPartyInvitations/get-party-invitations.query';
 
 const EventHandlers = [
   QueueUpdatedHandler,
@@ -38,6 +39,7 @@ const EventHandlers = [
 
 const QueryHandlers = [
 
+  outerQuery(GetPartyInvitationsQuery, "QueryCore"),
   outerQuery(GetQueueStateQuery, "QueryCore"),
   outerQuery(GetSessionByUserQuery, "QueryCore"),
   outerQuery(GetUserQueueQuery, "QueryCore"),
