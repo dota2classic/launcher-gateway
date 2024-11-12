@@ -20,9 +20,9 @@ export enum Messages {
   INVITE_TO_PARTY = 'INVITE_TO_PARTY',
   PARTY_INVITE_RECEIVED = 'PARTY_INVITE_RECEIVED',
   PARTY_INVITE_EXPIRED = 'PARTY_INVITE_EXPIRED',
-  ACCEPT_PARTY_INVITE = "ACCEPT_PARTY_INVITE",
-  LEAVE_PARTY = "LEAVE_PARTY",
-  PARTY_UPDATED = "PARTY_UPDATED",
+  ACCEPT_PARTY_INVITE = 'ACCEPT_PARTY_INVITE',
+  LEAVE_PARTY = 'LEAVE_PARTY',
+  PARTY_UPDATED = 'PARTY_UPDATED',
   BAD_AUTH = 'BAD_AUTH',
   ONLINE_UPDATE = 'ONLINE_UPDATE',
 }
@@ -77,4 +77,9 @@ export interface PartyInvite {
 export interface BrowserSocketAuth {
   token: string;
   recaptchaToken: string;
+}
+
+export interface OnlineUpdateMessage {
+  // List of online players
+  online: string[];
 }

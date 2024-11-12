@@ -12,7 +12,7 @@ import { QueueRepository } from '../../launcher-gateway/repository/queue.reposit
 import { EventBus, QueryBus } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { BrowserSocketAuth, Messages } from '../messages';
+import { BrowserSocketAuth, Messages, OnlineUpdateMessage } from '../messages';
 import { MatchmakingModes } from '../../gateway/shared-types/matchmaking-mode';
 import { GetUserRoomQuery } from '../../gateway/queries/GetUserRoom/get-user-room.query';
 import { GetUserRoomQueryResult } from '../../gateway/queries/GetUserRoom/get-user-room-query.result';
@@ -27,9 +27,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Dota2Version } from '../../gateway/shared-types/dota2version';
 import { QueueReadModel } from '../../launcher-gateway/model/queue.read-model';
 import { GetPartyInvitationsQuery } from '../../gateway/queries/GetPartyInvitations/get-party-invitations.query';
-import {
-  GetPartyInvitationsQueryResult,
-} from '../../gateway/queries/GetPartyInvitations/get-party-invitations-query.result';
+import { GetPartyInvitationsQueryResult } from '../../gateway/queries/GetPartyInvitations/get-party-invitations-query.result';
 import { PartyInviteCreatedEvent } from '../../gateway/events/party/party-invite-created.event';
 
 @WebSocketGateway({
@@ -65,7 +63,7 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
 
       await this.onClientAuthenticated(client);
     } catch (e) {
-      client.emit(Messages.BAD_AUTH)
+      client.emit(Messages.BAD_AUTH);
       client.disconnect();
     }
   }
@@ -74,9 +72,7 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
   async onBrowserAuth(
     @MessageBody() data: BrowserSocketAuth,
     @ConnectedSocket() client: LauncherSocket,
-  ) {
-
-  }
+  ) {}
 
   private async verifyRecaptcha(reToken: string) {
     const url = `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_TOKEN}&response=${reToken}`;
@@ -94,13 +90,14 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
   async handleDisconnect(client: LauncherSocket) {
     // here on disconnect we start timer
 
-    const totalConnections = Array.from(this.server.sockets.sockets.values()).filter(
+    const totalConnections = Array.from(
+      this.server.sockets.sockets.values(),
+    ).filter(
       (it: LauncherSocket) => it.steam_id === client.steam_id,
     ) as LauncherSocket[];
 
     if (totalConnections.length === 0)
       return this.startDisconnectCountdown(client);
-
 
     await this.updateOnline();
   }
@@ -125,9 +122,8 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
           PlayerLeaveQueueCommand.name,
           new PlayerLeaveQueueCommand(playerId, mode, Dota2Version.Dota_684),
         )
-        .toPromise()
-      ]
-    );
+        .toPromise(),
+    ]);
     return Promise.all(cmds);
   }
 
@@ -136,7 +132,9 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
       this.disconnectAction(client.playerId);
     }, 60_000);
     await this.stopDisconnectCountdown(client);
-    this.disconnectConsiderLeaver[client.steam_id] = timer as unknown as number;
+    this.disconnectConsiderLeaver[
+      client.steam_id
+    ] = (timer as unknown) as number;
   }
 
   private async onClientAuthenticated(client: LauncherSocket) {
@@ -147,29 +145,30 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
       client.emit(Messages.QUEUE_UPDATE, {
         mode: t,
         version: Dota2Version.Dota_681,
-        inQueue: this.qRep.get(QueueReadModel.id(t, Dota2Version.Dota_681)).inQueue,
+        inQueue: this.qRep.get(QueueReadModel.id(t, Dota2Version.Dota_681))
+          .inQueue,
       });
 
       client.emit(Messages.QUEUE_UPDATE, {
         mode: t,
         version: Dota2Version.Dota_684,
-        inQueue: this.qRep.get(QueueReadModel.id(t, Dota2Version.Dota_684)).inQueue,
+        inQueue: this.qRep.get(QueueReadModel.id(t, Dota2Version.Dota_684))
+          .inQueue,
       });
     });
 
     client.emit(Messages.AUTH, { success: true });
     // This thing is for what queue are we in?
-    await this.deliver.updateQueue(client)
+    await this.deliver.updateQueue(client);
 
     // This thing is for "party invites
     const partyInvState = await this.getPartyInviteStates(client.playerId);
-    this.ebus.publishAll(partyInvState.invitations.map(x => new PartyInviteCreatedEvent(
-      x.id,
-      x.partyId,
-      x.leaderId,
-      x.invited
-    )))
-
+    this.ebus.publishAll(
+      partyInvState.invitations.map(
+        x =>
+          new PartyInviteCreatedEvent(x.id, x.partyId, x.leaderId, x.invited),
+      ),
+    );
 
     // this thing is for "ready check state"
     const roomState = await this.getRoomState(client.playerId);
@@ -180,7 +179,6 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
     client.emit(Messages.MATCH_STATE, matchState?.serverUrl);
 
     await this.updateOnline();
-
   }
 
   private async getMatchState(playerId: PlayerId) {
@@ -196,24 +194,27 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
     );
   }
 
-  private async getPartyInviteStates(playerId: PlayerId){
-    return this.qbus.execute<GetPartyInvitationsQuery, GetPartyInvitationsQueryResult>(
-      new GetPartyInvitationsQuery(playerId)
-    )
+  private async getPartyInviteStates(playerId: PlayerId) {
+    return this.qbus.execute<
+      GetPartyInvitationsQuery,
+      GetPartyInvitationsQueryResult
+    >(new GetPartyInvitationsQuery(playerId));
   }
 
-  private async updateOnline(socket?: LauncherSocket){
+  private async updateOnline(socket?: LauncherSocket) {
+    const clients = new Set(
+      Array.from(this.server.sockets.sockets.values()).map(
+        (it: LauncherSocket) => it.steam_id,
+      ),
+    );
 
-    const clients = new Set(Array.from(this.server.sockets.sockets.values()).map((it: LauncherSocket) => it.steam_id));
-
-    const evt: any = {
-      online: clients.size
+    const evt: OnlineUpdateMessage = {
+      online: Array.from(clients.values()),
     };
-    if(socket){
-      socket.emit(Messages.ONLINE_UPDATE, evt)
-    }else {
-      this.server.emit(Messages.ONLINE_UPDATE, evt)
+    if (socket) {
+      socket.emit(Messages.ONLINE_UPDATE, evt);
+    } else {
+      this.server.emit(Messages.ONLINE_UPDATE, (evt as unknown) as any);
     }
-
   }
 }
