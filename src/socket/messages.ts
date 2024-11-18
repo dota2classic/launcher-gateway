@@ -83,3 +83,18 @@ export interface OnlineUpdateMessage {
   // List of online players
   online: string[];
 }
+
+
+export interface QueueStateMessage {
+  inQueue: boolean;
+}
+
+export interface InQueueStateMessage extends  QueueStateMessage {
+  inQueue: true;
+  mode: MatchmakingMode;
+  version: Dota2Version;
+}
+
+export interface InactiveQueueStateMessage extends  QueueStateMessage {
+  inQueue: false;
+}

@@ -1,9 +1,6 @@
 import { EventsHandler, IEventHandler, QueryBus } from '@nestjs/cqrs';
 import { SyncQueueStateEvent } from '../event/sync-queue-state.event';
 import { LauncherDeliver } from '../../socket/launcher.deliver';
-import { GetUserQueueQuery } from '../../gateway/queries/GetUserQueue/get-user-queue.query';
-import { GetUserQueueQueryResult } from '../../gateway/queries/GetUserQueue/get-user-queue-query.result';
-import { Messages } from '../../socket/messages';
 
 @EventsHandler(SyncQueueStateEvent)
 export class SyncQueueStateHandler
@@ -14,16 +11,8 @@ export class SyncQueueStateHandler
   ) {}
 
   async handle(event: SyncQueueStateEvent) {
-    this.deliver.allConnected.map(async p => {
-      const s = await this.qbus.execute<
-        GetUserQueueQuery,
-        GetUserQueueQueryResult
-      >(new GetUserQueueQuery(p.playerId));
-
-      this.deliver.deliver(p.playerId, Messages.QUEUE_STATE, {
-        mode: s.mode,
-        version: s.version,
-      });
-    });
+    await Promise.all(
+      this.deliver.allConnected.map(p => this.deliver.updateQueue(p)),
+    );
   }
 }

@@ -3,7 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { PlayerId } from '../gateway/shared-types/player-id';
 import { GetUserQueueQuery } from '../gateway/queries/GetUserQueue/get-user-queue.query';
 import { GetUserQueueQueryResult } from '../gateway/queries/GetUserQueue/get-user-queue-query.result';
-import { Messages } from './messages';
+import { InactiveQueueStateMessage, InQueueStateMessage, Messages } from './messages';
 import { QueryBus } from '@nestjs/cqrs';
 
 export interface LauncherSocket extends Socket {
@@ -48,10 +48,17 @@ export class LauncherDeliver {
       GetUserQueueQueryResult
     >(new GetUserQueueQuery(new PlayerId(client.steam_id)));
 
-    client.emit(
-      Messages.QUEUE_STATE,
-      qState.mode === null ? undefined : qState.mode,
-    );
+    if(qState.version){
+      client.emit(
+        Messages.QUEUE_STATE,
+        { mode: qState.mode!, version: qState.version!, inQueue: true  } satisfies InQueueStateMessage
+      )
+    }else {
+      client.emit(
+        Messages.QUEUE_STATE,
+        { inQueue: false  } satisfies InactiveQueueStateMessage
+      )
+    }
   }
 
   public async broadcast<T>(plrs: PlayerId[], t: (p: PlayerId) => [any, T]) {
