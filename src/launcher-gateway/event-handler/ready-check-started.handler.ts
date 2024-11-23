@@ -1,4 +1,9 @@
-import { CommandBus, EventBus, EventsHandler, IEventHandler } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  EventBus,
+  EventsHandler,
+  IEventHandler,
+} from '@nestjs/cqrs';
 import { ReadyCheckStartedEvent } from '../../gateway/events/ready-check-started.event';
 import { LauncherDeliver } from '../../socket/launcher.deliver';
 import { Messages } from '../../socket/messages';
@@ -22,6 +27,10 @@ export class ReadyCheckStartedHandler
         total: RoomSizes[event.mode],
         accepted: 0,
         roomID: event.roomId,
+        entries: event.entries.map(entry => ({
+          steam_id: entry.playerId.value,
+          state: entry.readyState,
+        })),
       },
     );
   }

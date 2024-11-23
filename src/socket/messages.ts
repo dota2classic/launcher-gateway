@@ -1,5 +1,6 @@
 import { MatchmakingMode } from '../gateway/shared-types/matchmaking-mode';
 import { Dota2Version } from '../gateway/shared-types/dota2version';
+import { ReadyState } from '../gateway/events/ready-state-received.event';
 
 export enum Messages {
   AUTH = 'AUTH',
@@ -27,11 +28,16 @@ export enum Messages {
   ONLINE_UPDATE = 'ONLINE_UPDATE',
 }
 
+interface ReadyCheckEntry {
+  steamId: string;
+  state: ReadyState
+}
 export interface ReadyCheckUpdate {
   roomID: string;
   mode: MatchmakingMode;
   total: number;
   accepted: number;
+  entries: ReadyCheckEntry[]
 }
 
 export interface UpdateQueue {

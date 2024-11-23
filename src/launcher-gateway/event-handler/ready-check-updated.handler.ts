@@ -2,7 +2,6 @@ import { ReadyStateUpdatedEvent } from '../../gateway/events/ready-state-updated
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { LauncherDeliver } from '../../socket/launcher.deliver';
 import { Messages } from '../../socket/messages';
-import { RoomSizes } from '../../gateway/shared-types/matchmaking-mode';
 
 @EventsHandler(ReadyStateUpdatedEvent)
 export class ReadyStateUpdatedHandler
@@ -18,6 +17,10 @@ export class ReadyStateUpdatedHandler
         mode: event.mode,
         total: event.state.total,
         accepted: event.state.accepted,
+        entries: event.entries.map(entry => ({
+          steam_id: entry.playerId.value,
+          state: entry.readyState,
+        })),
       },
     );
   }
