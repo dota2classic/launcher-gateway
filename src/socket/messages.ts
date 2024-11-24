@@ -40,6 +40,14 @@ export interface ReadyCheckUpdate {
   entries: ReadyCheckEntry[]
 }
 
+export interface GameFound {
+  mode: MatchmakingMode;
+  total: number;
+  roomID: string;
+  accepted: number;
+  entries: ReadyCheckEntry[]
+}
+
 export interface UpdateQueue {
   mode: MatchmakingMode;
   inQueue: number;
