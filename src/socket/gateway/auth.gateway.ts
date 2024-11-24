@@ -172,14 +172,19 @@ export class AuthGateway implements OnGatewayDisconnect, OnGatewayConnection {
 
     // this thing is for "ready check state"
     const roomState = await this.getRoomState(client.playerId);
-    client.emit(Messages.ROOM_STATE, {
-      ...roomState?.info,
-      entries:
-        roomState.info?.entries.map(entry => ({
-          steam_id: entry.playerId.value,
-          state: entry.readyState,
-        })) || [],
-    });
+    client.emit(
+      Messages.ROOM_STATE,
+      roomState.info
+        ? {
+            ...roomState.info,
+            entries:
+              roomState.info.entries.map(entry => ({
+                steam_id: entry.playerId.value,
+                state: entry.readyState,
+              })) || [],
+          }
+        : undefined,
+    );
 
     // this thing is for "current match"
     const matchState = await this.getMatchState(client.playerId);
